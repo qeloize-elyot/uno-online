@@ -250,9 +250,8 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Login como convidado (sem conta)
   socket.on('guest_login', (name) => {
-    if (!name || name.trim().length < 2) {
+    if (!name || typeof name !== 'string' || name.trim().length < 2) {
       return socket.emit('error_msg', { msg: 'Nome inválido' });
     }
     currentUser = name.trim().slice(0, 15);
@@ -273,7 +272,7 @@ io.on('connection', (socket) => {
     if (!currentUser) return socket.emit('error_msg', { msg: 'Digite um nome ou faça login primeiro' });
     code = (code || '').toUpperCase().trim();
     const room = rooms.get(code);
-    if (!room) return socket.emit('error_msg', { msg: 'Sala não encontrada' });
+    if (!room) return socket.emit('error_msg', { msg: 'Sala não encontrada. Confira o código ou peça pro host criar de novo.' });
     if (room.status !== 'waiting') return socket.emit('error_msg', { msg: 'Jogo já começou' });
     if (room.players.length >= room.maxPlayers) return socket.emit('error_msg', { msg: 'Sala cheia' });
     if (room.players.some(p => p.username === currentUser)) {
@@ -326,13 +325,26 @@ io.on('connection', (socket) => {
     const card = player.hand[cardIndex];
     const top = room.discard[room.discard.length - 1];
 
+    // Validate play - regras oficiais Mattel + stacking como house rule
     if (room.drawStack > 0) {
-      if (!room.settings.stacking) return socket.emit('error_msg', { msg: 'Você deve comprar as cartas' });
-      if (card.value !== 'draw2' && card.value !== 'wild4') {
-        return socket.emit('error_msg', { msg: 'Só pode jogar +2 ou +4' });
+      if (!room.settings.stacking) {
+        return socket.emit('error_msg', { msg: 'Você deve comprar as cartas (empilhamento desativado)' });
       }
-    } else if (!card.canPlayOn(top, room.currentColor)) {
-      return socket.emit('error_msg', { msg: 'Carta não pode ser jogada' });
+      if (card.value === 'draw2' || card.value === 'wild4') {
+        // ok
+      } else {
+        return socket.emit('error_msg', { msg: 'Só pode empilhar +2 ou +4' });
+      }
+    } else {
+      if (card.value === 'wild4') {
+        // Regra oficial: só pode jogar +4 se NÃO tiver carta da cor atual
+        const hasMatchingColor = player.hand.some(c => c.color === room.currentColor && c.value !== 'wild' && c.value !== 'wild4');
+        if (hasMatchingColor) {
+          return socket.emit('error_msg', { msg: 'Não pode jogar +4: você tem carta da cor atual!' });
+        }
+      } else if (!card.canPlayOn(top, room.currentColor)) {
+        return socket.emit('error_msg', { msg: 'Carta não pode ser jogada' });
+      }
     }
 
     player.hand.splice(cardIndex, 1);
@@ -458,16 +470,12 @@ io.on('connection', (socket) => {
     if (!room) { currentRoom = null; return; }
 
     const idx = room.players.findIndex(p => p.id === socket.id);
-    if (idx !== -1) {
-      room.players.splice(idx, 1);
-    }
+    if (idx !== -1) room.players.splice(idx, 1);
 
     if (room.players.length === 0) {
       rooms.delete(currentRoom);
     } else {
-      if (room.host === socket.id) {
-        room.host = room.players[0].id;
-      }
+      if (room.host === socket.id) room.host = room.players[0].id;
       if (room.status === 'playing' && room.currentPlayerIndex >= room.players.length) {
         room.currentPlayerIndex = 0;
       }
