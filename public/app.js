@@ -59,6 +59,24 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
   }
 });
 
+// JOGAR COMO CONVIDADO
+document.getElementById('btn-guest').addEventListener('click', () => {
+  let name = document.getElementById('guest-name').value.trim();
+  if (!name) name = 'Convidado' + Math.floor(Math.random() * 9000 + 1000);
+  if (name.length < 2) {
+    document.getElementById('auth-error').textContent = 'Digite um nome com pelo menos 2 letras';
+    return;
+  }
+  token = null;
+  username = name;
+  localStorage.setItem('uno_user', username);
+  localStorage.removeItem('uno_token');
+  document.getElementById('lobby-username').textContent = username + ' (convidado)';
+  document.getElementById('lobby-stats').textContent = 'Modo convidado';
+  socket.emit('guest_login', username);
+  showScreen('lobby-screen');
+});
+
 function saveAuth(data) {
   token = data.token;
   username = data.username;
