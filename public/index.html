@@ -8,29 +8,49 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <!-- LOGIN / REGISTER -->
   <div id="auth-screen" class="screen active">
     <div class="auth-box">
       <div class="logo">
         <span class="logo-u">U</span><span class="logo-n">N</span><span class="logo-o">O</span>
       </div>
       <h1>Online Multiplayer</h1>
+
+      <!-- JOGAR COMO CONVIDADO (mais fácil) -->
+      <div style="margin-bottom: 20px;">
+        <input type="text" id="guest-name" placeholder="Seu nome (convidado)" maxlength="15" 
+               style="width:100%;padding:14px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:rgba(0,0,0,0.3);color:#fff;font-size:16px;font-family:inherit;outline:none;margin-bottom:10px;" />
+        <button id="btn-guest" class="btn-primary" style="width:100%;">Jogar como Convidado</button>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:10px;margin:16px 0;opacity:0.5;">
+        <div style="flex:1;height:1px;background:#fff;"></div>
+        <span style="font-size:13px;">ou</span>
+        <div style="flex:1;height:1px;background:#fff;"></div>
+      </div>
+
       <div class="tabs">
         <button class="tab active" data-tab="login">Entrar</button>
         <button class="tab" data-tab="register">Criar Conta</button>
       </div>
+
       <form id="login-form" class="auth-form">
         <input type="text" id="login-user" placeholder="Usuário" required autocomplete="username" />
         <input type="password" id="login-pass" placeholder="Senha" required autocomplete="current-password" />
         <button type="submit" class="btn-primary">Entrar</button>
       </form>
+
       <form id="register-form" class="auth-form" style="display:none">
         <input type="text" id="reg-user" placeholder="Usuário (min 3)" required minlength="3" autocomplete="username" />
         <input type="password" id="reg-pass" placeholder="Senha (min 4)" required minlength="4" autocomplete="new-password" />
         <button type="submit" class="btn-primary">Criar Conta</button>
       </form>
+
       <p id="auth-error" class="error-msg"></p>
     </div>
   </div>
+
+  <!-- LOBBY -->
   <div id="lobby-screen" class="screen">
     <header class="lobby-header">
       <div class="user-info">
@@ -39,12 +59,14 @@
       </div>
       <button id="btn-logout" class="btn-small">Sair</button>
     </header>
+
     <div class="lobby-content">
       <div class="lobby-card">
         <h2>Criar Sala</h2>
         <p>Crie uma sala e compartilhe o código com os amigos</p>
         <button id="btn-create-room" class="btn-primary">Criar Nova Sala</button>
       </div>
+
       <div class="lobby-card">
         <h2>Entrar em Sala</h2>
         <input type="text" id="join-code" placeholder="Código da sala" maxlength="6" style="text-transform:uppercase" />
@@ -53,6 +75,8 @@
     </div>
     <p id="lobby-error" class="error-msg"></p>
   </div>
+
+  <!-- ROOM WAITING -->
   <div id="room-screen" class="screen">
     <header class="room-header">
       <div>
@@ -61,13 +85,17 @@
       </div>
       <button id="btn-leave-room" class="btn-small">Sair</button>
     </header>
+
     <div class="room-players" id="room-players-list"></div>
+
     <div class="room-actions">
       <p id="room-status">Aguardando jogadores...</p>
       <button id="btn-start-game" class="btn-primary" style="display:none">Começar Jogo</button>
       <p class="hint">Mínimo 2 jogadores • Máximo 8</p>
     </div>
   </div>
+
+  <!-- GAME -->
   <div id="game-screen" class="screen">
     <header class="game-header">
       <div class="direction-indicator" id="direction">→</div>
@@ -80,7 +108,9 @@
         <span id="room-code-game" class="room-code-mini"></span>
       </div>
     </header>
+
     <div class="opponents" id="opponents"></div>
+
     <div class="table">
       <div class="piles">
         <div class="draw-pile" id="draw-pile">
@@ -92,6 +122,7 @@
       <div class="current-color-dot" id="color-dot"></div>
       <div class="msg" id="game-msg"></div>
     </div>
+
     <div class="my-hand-area">
       <div class="hand-info">
         <span id="my-name">Você</span>
@@ -104,6 +135,8 @@
       </div>
     </div>
   </div>
+
+  <!-- COLOR MODAL -->
   <div id="color-modal" class="modal">
     <div class="modal-box">
       <h2>Escolha a cor</h2>
@@ -115,12 +148,15 @@
       </div>
     </div>
   </div>
+
+  <!-- GAME OVER -->
   <div id="gameover-modal" class="modal">
     <div class="modal-box">
       <h2 id="winner-text">Vitória!</h2>
       <button id="btn-back-lobby" class="btn-primary">Voltar ao Lobby</button>
     </div>
   </div>
+
   <script src="/socket.io/socket.io.js"></script>
   <script src="app.js"></script>
 </body>
