@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>UNO Online</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="auth-screen" class="screen active">
+    <div class="auth-box">
+      <div class="logo">
+        <span class="logo-u">U</span><span class="logo-n">N</span><span class="logo-o">O</span>
+      </div>
+      <h1>Online Multiplayer</h1>
+      <div class="tabs">
+        <button class="tab active" data-tab="login">Entrar</button>
+        <button class="tab" data-tab="register">Criar Conta</button>
+      </div>
+      <form id="login-form" class="auth-form">
+        <input type="text" id="login-user" placeholder="Usuário" required autocomplete="username" />
+        <input type="password" id="login-pass" placeholder="Senha" required autocomplete="current-password" />
+        <button type="submit" class="btn-primary">Entrar</button>
+      </form>
+      <form id="register-form" class="auth-form" style="display:none">
+        <input type="text" id="reg-user" placeholder="Usuário (min 3)" required minlength="3" autocomplete="username" />
+        <input type="password" id="reg-pass" placeholder="Senha (min 4)" required minlength="4" autocomplete="new-password" />
+        <button type="submit" class="btn-primary">Criar Conta</button>
+      </form>
+      <p id="auth-error" class="error-msg"></p>
+    </div>
+  </div>
+  <div id="lobby-screen" class="screen">
+    <header class="lobby-header">
+      <div class="user-info">
+        <span id="lobby-username">Usuário</span>
+        <span id="lobby-stats" class="stats">0 vitórias</span>
+      </div>
+      <button id="btn-logout" class="btn-small">Sair</button>
+    </header>
+    <div class="lobby-content">
+      <div class="lobby-card">
+        <h2>Criar Sala</h2>
+        <p>Crie uma sala e compartilhe o código com os amigos</p>
+        <button id="btn-create-room" class="btn-primary">Criar Nova Sala</button>
+      </div>
+      <div class="lobby-card">
+        <h2>Entrar em Sala</h2>
+        <input type="text" id="join-code" placeholder="Código da sala" maxlength="6" style="text-transform:uppercase" />
+        <button id="btn-join-room" class="btn-primary">Entrar</button>
+      </div>
+    </div>
+    <p id="lobby-error" class="error-msg"></p>
+  </div>
+  <div id="room-screen" class="screen">
+    <header class="room-header">
+      <div>
+        <span class="room-code-label">Código da Sala</span>
+        <span id="room-code" class="room-code">ABC12</span>
+      </div>
+      <button id="btn-leave-room" class="btn-small">Sair</button>
+    </header>
+    <div class="room-players" id="room-players-list"></div>
+    <div class="room-actions">
+      <p id="room-status">Aguardando jogadores...</p>
+      <button id="btn-start-game" class="btn-primary" style="display:none">Começar Jogo</button>
+      <p class="hint">Mínimo 2 jogadores • Máximo 8</p>
+    </div>
+  </div>
+  <div id="game-screen" class="screen">
+    <header class="game-header">
+      <div class="direction-indicator" id="direction">→</div>
+      <div class="current-turn">
+        <span id="current-turn-name">Jogador</span>
+        <span class="turn-label">jogando</span>
+      </div>
+      <div class="header-right">
+        <button id="btn-uno" class="btn-uno" disabled>UNO!</button>
+        <span id="room-code-game" class="room-code-mini"></span>
+      </div>
+    </header>
+    <div class="opponents" id="opponents"></div>
+    <div class="table">
+      <div class="piles">
+        <div class="draw-pile" id="draw-pile">
+          <div class="card card-back"></div>
+          <span class="count" id="deck-count">0</span>
+        </div>
+        <div class="discard-pile" id="discard-pile"></div>
+      </div>
+      <div class="current-color-dot" id="color-dot"></div>
+      <div class="msg" id="game-msg"></div>
+    </div>
+    <div class="my-hand-area">
+      <div class="hand-info">
+        <span id="my-name">Você</span>
+        <span id="my-count">0 cartas</span>
+      </div>
+      <div class="hand" id="my-hand"></div>
+      <div class="actions">
+        <button id="btn-draw" class="btn-secondary">Comprar</button>
+        <button id="btn-pass" class="btn-secondary" disabled>Passar</button>
+      </div>
+    </div>
+  </div>
+  <div id="color-modal" class="modal">
+    <div class="modal-box">
+      <h2>Escolha a cor</h2>
+      <div class="color-grid">
+        <button class="c-btn red" data-c="red"></button>
+        <button class="c-btn blue" data-c="blue"></button>
+        <button class="c-btn green" data-c="green"></button>
+        <button class="c-btn yellow" data-c="yellow"></button>
+      </div>
+    </div>
+  </div>
+  <div id="gameover-modal" class="modal">
+    <div class="modal-box">
+      <h2 id="winner-text">Vitória!</h2>
+      <button id="btn-back-lobby" class="btn-primary">Voltar ao Lobby</button>
+    </div>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
