@@ -59,7 +59,6 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
   }
 });
 
-// JOGAR COMO CONVIDADO
 document.getElementById('btn-guest').addEventListener('click', () => {
   let name = document.getElementById('guest-name').value.trim();
   if (!name) name = 'Convidado' + Math.floor(Math.random() * 9000 + 1000);
@@ -134,9 +133,7 @@ document.getElementById('btn-join-room').addEventListener('click', () => {
   }
   document.getElementById('lobby-error').textContent = 'Entrando...';
   if (!token) socket.emit('guest_login', username);
-  setTimeout(() => {
-    socket.emit('join_room', code);
-  }, 150);
+  setTimeout(() => { socket.emit('join_room', code); }, 150);
 });
 
 document.getElementById('join-code').addEventListener('keypress', (e) => {
@@ -209,9 +206,7 @@ socket.on('game_update', ({ room, hand, lastPlay, message }) => {
   justDrew = false;
   updateGameUI(room);
   if (message) showMsg(message);
-  if (lastPlay) {
-    showMsg(`${lastPlay.username} jogou uma carta`);
-  }
+  if (lastPlay) showMsg(`${lastPlay.username} jogou uma carta`);
 });
 
 socket.on('drew_card', ({ card, hand }) => {
@@ -259,13 +254,10 @@ function updateGameUI(room) {
 
   const discardEl = document.getElementById('discard-pile');
   discardEl.innerHTML = '';
-  if (room.topCard) {
-    discardEl.appendChild(createCardEl(room.topCard, false));
-  }
+  if (room.topCard) discardEl.appendChild(createCardEl(room.topCard, false));
 
   document.getElementById('deck-count').textContent = room.deckCount + ' cartas';
-  const colorDot = document.getElementById('color-dot');
-  colorDot.style.background = `var(--${room.currentColor})`;
+  document.getElementById('color-dot').style.background = `var(--${room.currentColor})`;
 
   document.getElementById('my-name').textContent = username;
   document.getElementById('my-count').textContent = myHand.length + ' cartas';
@@ -297,11 +289,7 @@ function updateGameUI(room) {
 
   document.getElementById('btn-draw').disabled = !isMyTurn;
   document.getElementById('btn-pass').disabled = !isMyTurn || !justDrew;
-  if (room.drawStack > 0) {
-    document.getElementById('btn-draw').textContent = `Comprar ${room.drawStack}`;
-  } else {
-    document.getElementById('btn-draw').textContent = 'Comprar';
-  }
+  document.getElementById('btn-draw').textContent = room.drawStack > 0 ? `Comprar ${room.drawStack}` : 'Comprar';
 
   const unoBtn = document.getElementById('btn-uno');
   if (myHand.length === 1) {
@@ -314,27 +302,19 @@ function updateGameUI(room) {
 }
 
 function canPlayCard(card, room) {
-  if (room.drawStack > 0) {
-    return card.value === 'draw2' || card.value === 'wild4';
-  }
+  if (room.drawStack > 0) return card.value === 'draw2' || card.value === 'wild4';
   if (card.color === 'black') return true;
   if (card.color === room.currentColor) return true;
   if (room.topCard && card.value === room.topCard.value) return true;
   return false;
 }
 
-function createCardEl(card, interactive) {
+function createCardEl(card) {
   const el = document.createElement('div');
   el.className = `card ${card.color} ${card.value}`;
   const display = { skip: '⊘', reverse: '↺', draw2: '+2', wild: 'W', wild4: '+4' }[card.value] || card.value;
   const sm = ['skip','reverse','draw2','wild','wild4'].includes(card.value) ? 'sm' : '';
-  el.innerHTML = `
-    <div class="card-inner">
-      <span class="card-corner tl">${display}</span>
-      <span class="card-value ${sm}">${display}</span>
-      <span class="card-corner br">${display}</span>
-    </div>
-  `;
+  el.innerHTML = `<div class="card-inner"><span class="card-corner tl">${display}</span><span class="card-value ${sm}">${display}</span><span class="card-corner br">${display}</span></div>`;
   return el;
 }
 
@@ -364,14 +344,15 @@ document.getElementById('draw-pile').addEventListener('click', () => {
   if (isMyTurn) socket.emit('draw_card');
 });
 
-document.querySelectorAll('.c-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    if (pendingWildCard) {
-      socket.emit('play_card', { cardId: pendingWildCard.id, chosenColor: btn.dataset.c });
-      pendingWildCard = null;
-      document.getElementById('color-modal').classList.remove('active');
-    }
-  });
+// Escolha de cor - mais robusto no celular
+document.getElementById('color-modal').addEventListener('click', (e) => {
+  const btn = e.target.closest('.c-btn');
+  if (!btn || !pendingWildCard) return;
+  const color = btn.dataset.c;
+  if (!color) return;
+  socket.emit('play_card', { cardId: pendingWildCard.id, chosenColor: color });
+  pendingWildCard = null;
+  document.getElementById('color-modal').classList.remove('active');
 });
 
 socket.on('error_msg', ({ msg }) => {
