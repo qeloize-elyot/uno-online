@@ -250,8 +250,17 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Login como convidado (sem conta)
+  socket.on('guest_login', (name) => {
+    if (!name || name.trim().length < 2) {
+      return socket.emit('error_msg', { msg: 'Nome inválido' });
+    }
+    currentUser = name.trim().slice(0, 15);
+    socket.emit('authenticated', { username: currentUser, guest: true });
+  });
+
   socket.on('create_room', () => {
-    if (!currentUser) return socket.emit('error_msg', { msg: 'Faça login primeiro' });
+    if (!currentUser) return socket.emit('error_msg', { msg: 'Digite um nome ou faça login primeiro' });
     if (currentRoom) return socket.emit('error_msg', { msg: 'Você já está em uma sala' });
 
     const room = createRoom(socket.id, currentUser);
@@ -261,7 +270,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('join_room', (code) => {
-    if (!currentUser) return socket.emit('error_msg', { msg: 'Faça login primeiro' });
+    if (!currentUser) return socket.emit('error_msg', { msg: 'Digite um nome ou faça login primeiro' });
     code = (code || '').toUpperCase().trim();
     const room = rooms.get(code);
     if (!room) return socket.emit('error_msg', { msg: 'Sala não encontrada' });
